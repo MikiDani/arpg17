@@ -22,18 +22,21 @@ function createButton(html, cssclass){
 	return iDiv;
 };
 
-function Clickable(name, cstyle){
+function Clickable(name, cstyle, body){
 	this.name = name;
 	this.button = null;
 	this.cstyle = cstyle;
-	this.setbutton(name);
+	if (!body){
+		body = name;
+	}
+	this.setbutton(body);
 };
 Clickable.prototype.setbutton = function(html){
 	this.button = createButton(html, this.cstyle);
 };
 
-function Tool(name){
-	Clickable.call(this, name, "toolbutton");
+function Tool(name, body){
+	Clickable.call(this, name, "toolbutton", body);
 	this.descripion = "";
 	this.owned = false;
 	tools[name] = this;
@@ -44,15 +47,16 @@ function Tool(name){
 };
 Tool.prototype = Object.create( Clickable.prototype );
 
-function Optionc(name, owner, action){
-	Clickable.call(this, name, "optionbutton");
+function Optionc(name, owner, action, body){
+	Clickable.call(this, name, "optionbutton", body);
 	this.owner = owner;
 	this.action = action;
+	this.active = true;
 };
 Optionc.prototype = Object.create( Clickable.prototype );
 
-function Site(name){
-	Clickable.call(this, name, "sitebutton")
+function Site(name, body){
+	Clickable.call(this, name, "sitebutton", body)
 	this.description = "";
 	this.img = "images/"+name+".jpg";
 	this.options = [];
@@ -73,6 +77,7 @@ Site.prototype.addOption = function(name, action){
 	o = new Optionc(name, this, action);
 	o.button.onclick = action;
 	this.options.push(o);
+	return o;
 };
 
 Site.prototype.addToolRelay = function(toolname, action) {
@@ -93,7 +98,9 @@ Site.prototype.show = function(){
 	picture.innerHTML = "<img src='" + this.img + "'/>";
 	clearchildren(options);
 	for (var o of this.options){
-		options.appendChild(o.button);
+		if (o.active){
+			options.appendChild(o.button);
+		}
 	}
 	console.innerHTML = this.description;
 	actsite = this;
